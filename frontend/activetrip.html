@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Active Trip</title>
+  <link rel="stylesheet" href="css/activetrip.css">
+  <script defer src="js/activetrip.js"></script>
+  <script src="https://api.olamaps.io/sdk.js"></script>
+</head>
+<body>
+
+  <!-- Top Right Logout Button -->
+  <div class="top-right">
+    <button id="logoutButton">Logout</button>
+  </div>
+
+  <!-- Active Trip Container -->
+  <div class="active-trip-container">
+    <h2>Active Trip</h2>
+    <div id="tripDetails" class="trip-details">
+      <!-- Trip details will be dynamically loaded here -->
+    </div>
+    <div id="mapContainer" class="map"></div>
+    <div id="additionalFields" class="additional-fields">
+      <!-- Additional fields based on user type will be added here -->
+    </div>
+  </div>
+
+  <!-- Notification Popup (will be added dynamically via JS) -->
+  <div id="notificationPopupContainer"></div>
+
+</body>
+</html>

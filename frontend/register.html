@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="OlaMapsWebSDK/style.css" rel="stylesheet"> <!-- Ola Maps CSS -->
+  <style>
+    .suggestions {
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: white;
+      position: absolute;
+      width: 95%;
+      margin-top: 5px;
+      z-index: 1000;
+    }
+
+    .suggestion {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .suggestion:hover {
+      background-color: #f2f2f2;
+    }
+
+    #mapContainer {
+      width: 100%;
+      height: 300px;
+      display: none; /* Hidden initially */
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Register</h2>
+
+  <form id="registerForm">
+    <label for="userType">Register as:</label>
+    <select id="userType" required>
+      <option value="customer" selected>Customer</option>
+      <option value="driver">Driver</option>
+    </select>
+
+    <input type="text" id="phone" placeholder="Phone Number" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="text" id="name" placeholder="Name" required />
+    <input type="text" id="gender" placeholder="Gender" required />
+
+    <div id="additionalFields"></div> <!-- Dynamic Fields -->
+
+    <button type="submit">Register</button>
+  </form>
+
+  <div id="mapContainer" style="height: 400px; display: none;"></div> <!-- Map -->
+
+  <script src="OlaMapsWebSDK/olamaps-js-sdk.umd.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>

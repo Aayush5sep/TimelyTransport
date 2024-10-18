@@ -1,0 +1,39 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+  }
+  
+  .top-right {
+    text-align: right;
+    margin: 10px;
+  }
+  
+  .active-trip-container {
+    padding: 20px;
+  }
+  
+  .trip-details {
+    margin-bottom: 20px;
+  }
+  
+  .map {
+    height: 400px;
+    width: 100%;
+  }
+  
+  .error {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .notification-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }  

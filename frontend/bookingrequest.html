@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Request</title>
+    
+    <link href="OlaMapsWebSDK/style.css" rel="stylesheet" />
+    <link href="css/bookingrequest.css" rel="stylesheet" />
+</head>
+<body>
+
+    <h2>Request Booking</h2>
+
+    <div id="map"></div>
+
+    <!-- Input for Start Location -->
+    <div class="form-group">
+        <input type="text" id="startLocation" placeholder="Enter Start Location" autocomplete="off" />
+        <div id="startSuggestions" class="suggestions"></div>
+    </div>
+
+    <!-- Input for Start Address -->
+    <div class="form-group">
+        <input type="text" id="startAddress" placeholder="Start Address" readonly />
+    </div>
+
+    <!-- Input for Destination Location -->
+    <div class="form-group">
+        <input type="text" id="endLocation" placeholder="Enter Destination" autocomplete="off" />
+        <div id="endSuggestions" class="suggestions"></div>
+    </div>
+
+    <!-- Input for Destination Address -->
+    <div class="form-group">
+        <input type="text" id="endAddress" placeholder="Destination Address" readonly />
+    </div>
+
+    <div class="form-group">
+        <label for="vehicleType">Select Vehicle Type:</label>
+        <select id="vehicleType">
+            <option>Bike</option>
+            <option>Car</option>
+            <option>Scooter</option>
+            <option>Mini Truck</option>
+        </select>
+    </div>
+
+    <button id="calculateBtn">Calculate Fare & ETA</button>
+
+    <div id="result" style="display: none;">
+        <h3>Estimated Details:</h3>
+        <p><strong>Distance:</strong> <span id="distance"></span></p>
+        <p><strong>ETA:</strong> <span id="eta"></span></p>
+        <p><strong>Fare:</strong> <span id="fare"></span></p>
+        <button id="requestBookingBtn">Request Booking</button>
+    </div>
+
+    <div id="bookingStatus" style="display: none;">
+        <h3>Finding drivers nearby...</h3>
+    </div>
+
+    <script src="OlaMapsWebSDK/olamaps-js-sdk.umd.js"></script>
+    <script src="js/bookingrequest.js"></script>
+</body>
+</html>

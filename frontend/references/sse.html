@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #notifications { margin-top: 20px; }
+        .notification { background: #e1f7d5; margin: 5px 0; padding: 10px; border: 1px solid #c3e6cb; }
+    </style>
+</head>
+<body>
+    <h1>Push Notification Test</h1>
+    <div id="notifications"></div>
+    <script>
+        const userId = "user123";
+        const user_type = "";
+        const eventSource = new EventSource(`http://localhost:8000/stream/${userId}/${user_type}`);
+
+        eventSource.onopen = () => {
+            console.log("Connected to the SSE server.");
+        };
+
+        eventSource.onmessage = (event) => {
+            const data = event.data;
+            console.log("Received message:", data);
+
+            const notificationContainer = document.getElementById("notifications");
+
+            // Create a new notification element
+            const notification = document.createElement("div");
+            notification.className = "notification";
+            notification.textContent = data;
+
+            // Append the new notification to the container
+            notificationContainer.appendChild(notification);
+        };
+
+        eventSource.onerror = (error) => {
+            console.error("SSE connection error:", error);
+        };
+    </script>
+</body>
+</html>

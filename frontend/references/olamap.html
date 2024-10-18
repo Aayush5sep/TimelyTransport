@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ola Maps - User Location with Draggable Marker</title>
+
+    <!-- Link to Ola Maps CSS -->
+    <link href="./OlaMapsWebSDK/style.css" rel="stylesheet" />
+
+    <style>
+        /* Styling the map container */
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Include Ola Maps JavaScript SDK -->
+    <script src="./OlaMapsWebSDK/olamaps-js-sdk.umd.js"></script>
+
+    <script>
+        // Initialize Ola Maps SDK with your API key
+        const olaMaps = new OlaMapsSDK.OlaMaps({
+            apiKey: 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa'  // Replace with your valid API key
+        });
+
+        // Function to initialize the map with a draggable marker
+        function initializeMap(latitude, longitude) {
+            const myMap = olaMaps.init({
+                style: "https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json",
+                container: 'map',
+                center: [longitude, latitude],  // Center the map on the user's location
+                zoom: 15  // Adjust zoom level
+            });
+
+            // Add a draggable marker on the user's location
+            const marker = olaMaps
+                .addMarker({
+                    offset: [0, -10],  // Optional: Adjust marker position if needed
+                    anchor: 'bottom',  // Anchor at the bottom for a pin-like marker
+                    color: 'red',      // Set marker color
+                    draggable: true    // Make the marker draggable
+                })
+                .setLngLat([longitude, latitude])  // Set initial marker position
+                .addTo(myMap);  // Add the marker to the map
+
+            // Event listener to log the new coordinates when the marker is dragged
+            marker.on('dragend', () => {
+                const newCoords = marker.getLngLat();
+                console.log('Marker moved to:', newCoords);
+                alert(`New Position: ${newCoords.lng}, ${newCoords.lat}`);
+            });
+        }
+
+        // Get user's current location using the Geolocation API
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    initializeMap(latitude, longitude);  // Initialize the map with user's location
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                    alert('Unable to retrieve your location.');
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    </script>
+
+</body>
+</html>

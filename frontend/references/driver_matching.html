@@ -1,0 +1,82 @@
+<!-- driver.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Trip Notifications</title>
+  <script>
+    let driverId;
+
+    // Get driver_id from token stored in localStorage
+    function getDriverIdFromToken() {
+      const token = localStorage.getItem("driver_token");
+      if (!token) {
+        alert("No token found! Please login.");
+        return null;
+      }
+      // Decode token to get driver_id (for simplicity, assuming it's stored directly)
+      return JSON.parse(atob(token.split(".")[1])).user_id;
+    }
+
+    function startSSEConnection() {
+      driverId = getDriverIdFromToken();
+      if (!driverId) return;
+
+      const eventSource = new EventSource(`http://localhost:8000/sse/driver/${driverId}`);
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.status === "trip_request") {
+          displayTripRequest(data);
+        }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error("SSE connection error:", error);
+      };
+    }
+
+    function displayTripRequest(data) {
+      const tripDetails = document.getElementById("trip_details");
+      tripDetails.innerHTML = `
+        <h3>New Trip Request</h3>
+        <p>Customer ID: ${data.customer_id}</p>
+        <p>Pickup: ${data.source_address}</p>
+        <p>Destination: ${data.destination_address}</p>
+        <button onclick="respondToTrip('accepted', '${data.customer_id}')">Accept</button>
+        <button onclick="respondToTrip('denied', '${data.customer_id}')">Deny</button>
+      `;
+    }
+
+    async function respondToTrip(status, customerId) {
+      const response = {
+        customer_id: customerId,
+        driver_id: driverId,
+        status: status,
+      };
+
+      try {
+        const result = await fetch("http://localhost:8000/driver/response", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(response),
+        });
+
+        const data = await result.json();
+        document.getElementById("status").innerText = data.message;
+        console.log("Response:", data);
+      } catch (error) {
+        console.error("Error sending driver response:", error);
+      }
+    }
+  </script>
+</head>
+<body onload="startSSEConnection()">
+  <h1>Driver Trip Notifications</h1>
+  <div id="trip_details">Waiting for trip requests...</div>
+  <p id="status">Status: Waiting for response...</p>
+</body>
+</html>

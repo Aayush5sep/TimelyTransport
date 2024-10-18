@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ola Maps - Distance and Fare Calculator</title>
+
+    <!-- Link to Ola Maps CSS -->
+    <link href="./OlaMapsWebSDK/style.css" rel="stylesheet" />
+
+    <style>
+        /* Styling the map container */
+        #map {
+            width: 100%;
+            height: 80vh;
+        }
+
+        /* Button and results styling */
+        #controls {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Controls and Results -->
+    <div id="controls">
+        <button id="calculateBtn">Calculate Fare and ETA</button>
+        <div id="results">
+            <h2>Route Details</h2>
+            <p><strong>Distance:</strong> <span id="distance">-</span></p>
+            <p><strong>ETA:</strong> <span id="eta">-</span></p>
+            <p><strong>Fare:</strong> <span id="fare">-</span> currency units</p>
+        </div>
+    </div>
+
+    <!-- Include Ola Maps JavaScript SDK -->
+    <script src="./OlaMapsWebSDK/olamaps-js-sdk.umd.js"></script>
+
+    <script>
+        const olaMaps = new OlaMapsSDK.OlaMaps({
+            apiKey: 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa'  // Replace with your valid API key
+        });
+
+        let myMap, sourceMarker, destinationMarker;
+
+        // Initialize the map and markers
+        function initializeMap(latitude, longitude) {
+            myMap = olaMaps.init({
+                style: "https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json",
+                container: 'map',
+                center: [longitude, latitude],
+                zoom: 15
+            });
+
+            // Source marker at the user's current location
+            sourceMarker = olaMaps
+                .addMarker({
+                    offset: [0, -10],
+                    anchor: 'bottom',
+                    color: 'red',
+                    draggable: true
+                })
+                .setLngLat([longitude, latitude])
+                .addTo(myMap);
+
+            // Destination marker at a default location
+            destinationMarker = olaMaps
+                .addMarker({
+                    offset: [0, -10],
+                    anchor: 'bottom',
+                    color: 'blue',
+                    draggable: true
+                })
+                .setLngLat([longitude, latitude])
+                .addTo(myMap);
+
+            // Update coordinates on marker drag
+            sourceMarker.on('dragend', updateMarkerPosition);
+            destinationMarker.on('dragend', updateMarkerPosition);
+        }
+
+        // Get user's location on page load
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    initializeMap(latitude, longitude);
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                    alert('Unable to retrieve your location.');
+                    initializeMap(18.760290, 73.381424);  // Default location
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by your browser.');
+            initializeMap(18.760290, 73.381424);  // Default location
+        }
+
+        // Function to update marker positions and log them
+        function updateMarkerPosition() {
+            const origin = sourceMarker.getLngLat();
+            const destination = destinationMarker.getLngLat();
+            console.log('Origin:', origin);
+            console.log('Destination:', destination);
+        }
+
+        // Function to format distance in km and meters
+        function formatDistance(distanceInMeters) {
+            const kilometers = Math.floor(distanceInMeters / 1000);
+            const meters = distanceInMeters % 1000;
+            return `${kilometers} km ${meters} m`;
+        }
+
+        // Function to format time in minutes and seconds
+        function formatTime(timeInSeconds) {
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = timeInSeconds % 60;
+            return `${minutes} min ${seconds} sec`;
+        }
+
+        // Function to fetch route details from the backend
+        async function calculateRoute() {
+            const origin = sourceMarker.getLngLat();
+            const destination = destinationMarker.getLngLat();
+
+            const response = await fetch('http://127.0.0.1:8001/eta-fare', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    source_location: {
+                        latitude: origin.lat, 
+                        longitude: origin.lng
+                    },
+                    destination_location: {
+                        latitude: destination.lat, 
+                        longitude: destination.lng
+                    }
+                })
+            });
+
+            const data = await response.json();
+
+            // Display the route details in the UI
+            document.getElementById('distance').innerText = formatDistance(data.distance);
+            document.getElementById('eta').innerText = formatTime(data.eta);
+            document.getElementById('fare').innerText = data.fare;
+        }
+
+        // Attach event listener to the calculate button
+        document.getElementById('calculateBtn').addEventListener('click', calculateRoute);
+    </script>
+
+</body>
+</html>

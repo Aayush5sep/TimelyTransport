@@ -1,0 +1,82 @@
+<!-- customer.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Trip Request</title>
+  <script>
+    let ws;
+
+    // Get user_id from token stored in localStorage
+    function getUserIdFromToken() {
+      const token = localStorage.getItem("customer_token");
+      if (!token) {
+        alert("No token found! Please login.");
+        return null;
+      }
+      // Decode token to get user_id (for simplicity, assuming it's stored directly)
+      return JSON.parse(atob(token.split(".")[1])).user_id;
+    }
+
+    async function startTripRequest() {
+      const userId = getUserIdFromToken();
+      if (!userId) return;
+
+      const sourceLatitude = document.getElementById("source_lat").value;
+      const sourceLongitude = document.getElementById("source_long").value;
+      const destinationLatitude = document.getElementById("dest_lat").value;
+      const destinationLongitude = document.getElementById("dest_long").value;
+
+      const bookingDetails = {
+        user_id: userId,
+        source_location: { latitude: parseFloat(sourceLatitude), longitude: parseFloat(sourceLongitude) },
+        destination_location: { latitude: parseFloat(destinationLatitude), longitude: parseFloat(destinationLongitude) },
+        source_address: "Pickup Address",
+        destination_address: "Destination Address",
+        vehicle_type: "car",
+      };
+
+      // Open WebSocket connection
+      ws = new WebSocket(`ws://localhost:8000/ws/request-booking/${userId}`);
+
+      ws.onopen = () => {
+        console.log("WebSocket connection established.");
+        ws.send(JSON.stringify(bookingDetails));
+      };
+
+      ws.onmessage = (event) => {
+        const message = event.data;
+        document.getElementById("status").innerText = message;
+        console.log("Message from server:", message);
+      };
+
+      ws.onclose = () => {
+        console.log("WebSocket connection closed.");
+        document.getElementById("status").innerText = "Connection closed.";
+      };
+    }
+
+    function cancelTripRequest() {
+      if (ws) {
+        ws.close();
+        console.log("WebSocket connection closed by customer.");
+        document.getElementById("status").innerText = "Trip request canceled.";
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Customer Trip Request</h1>
+
+  <input type="text" id="source_lat" placeholder="Source Latitude"><br>
+  <input type="text" id="source_long" placeholder="Source Longitude"><br>
+  <input type="text" id="dest_lat" placeholder="Destination Latitude"><br>
+  <input type="text" id="dest_long" placeholder="Destination Longitude"><br>
+
+  <button onclick="startTripRequest()">Request Trip</button>
+  <button onclick="cancelTripRequest()">Cancel Trip</button>
+
+  <p id="status">Status: Not connected</p>
+</body>
+</html>

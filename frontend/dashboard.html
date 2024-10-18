@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script defer src="js/dashboard.js"></script>
+</head>
+<body>
+
+  <!-- Top Right Logout Button -->
+  <div class="top-right">
+    <button id="logoutButton">Logout</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="dashboard-container">
+    
+    <!-- Left Section -->
+    <div class="left-section">
+      <h2>My Trips</h2>
+      <button id="activeTripButton">Active Trip</button>
+      <button id="tripHistoryButton">Trip History</button>
+    </div>
+
+    <!-- Right Section -->
+    <div class="right-section">
+      <div id="profileBox" class="profile-box">
+        <!-- User profile info will be dynamically loaded here -->
+      </div>
+      
+      <div id="userActionButtons" class="action-buttons">
+        <!-- User-specific buttons (Request New Booking for customer or toggle for driver) will be dynamically loaded here -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Notification Popup (will be added dynamically via JS) -->
+  <div id="notificationPopupContainer"></div>
+
+</body>
+</html>

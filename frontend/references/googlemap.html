@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Google Maps API Example</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+</head>
+<body>
+    <button onclick="getLocation()">Get Location</button>
+
+    <script>
+        function getLocation() {
+            const geocoder = new google.maps.Geocoder();
+
+            // Use the browser's geolocation to get coordinates
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    console.log("Latitude:", latitude, "Longitude:", longitude);
+
+                    // Reverse geocode to get address
+                    const latLng = { lat: latitude, lng: longitude };
+                    geocoder.geocode({ location: latLng }, (results, status) => {
+                        if (status === "OK" && results[0]) {
+                            const address = results[0].formatted_address;
+                            console.log("Address:", address);
+
+                            // Send data to backend
+                            sendLocationToBackend(latitude, longitude, address);
+                        } else {
+                            console.error("Geocoding failed:", status);
+                        }
+                    });
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                }
+            );
+        }
+
+        function sendLocationToBackend(latitude, longitude, address) {
+            fetch("http://localhost:8000/request-booking", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    user_id: "123",
+                    phone_number: "9876543210",
+                    home_location: {
+                        latitude: latitude,
+                        longitude: longitude,
+                        address: address
+                    },
+                }),
+            })
+                .then((response) => response.json())
+                .then((data) => console.log("Response from backend:", data))
+                .catch((error) => console.error("Error sending location:", error));
+        }
+    </script>
+</body>
+</html>
