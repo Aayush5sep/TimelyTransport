@@ -23,7 +23,7 @@ This project is built using **FastAPI** for the backend (microservice architectu
    [View Explanation Document](https://drive.google.com/file/d/1dmTW8Bi0f2UegjHM_-ZgRUbZ93j1KhJm/view?usp=drive_link)
 
 4. **Frontend Flow:**
-   [View FE Flow Image](https://drive.google.com/file/d/1KeBdVbr5vQH0pd0z_glBiKmCr2XDMV0k/view?usp=drive_link)
+   ![View FE Flow Image](https://drive.google.com/uc?1KeBdVbr5vQH0pd0z_glBiKmCr2XDMV0k)
 
 5. **Documentation Folder**
     [View Folder](https://drive.google.com/drive/folders/1dX_RyZfF0mF4qX2hsZ2DJNcvfEDQ45rr?usp=drive_link)
