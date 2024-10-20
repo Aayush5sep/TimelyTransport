@@ -27,8 +27,8 @@ This project is built using **FastAPI** for the backend (microservice architectu
    ![View Document Theme](https://drive.google.com/uc?id=1l2Eek3DwROi4kD6NGdl5ObFxQ69eIYW-)
 
 5. **API Documentation:**  
-   [View API Documentation](https://drive.google.com/file/d/1dmTW8Bi0f2UegjHM_-ZgRUbZ93j1KhJm/view?usp=drive_link)
-   ![View API Doc Theme](https://drive.google.com/file/d/1Gzm_1u5gsg8vYymkXj2GmkjXQOqeTTZ-/view?usp=drive_link)
+   [View API Documentation](https://drive.google.com/file/d/1Gzm_1u5gsg8vYymkXj2GmkjXQOqeTTZ-/view?usp=drive_link)
+   ![View API Doc Theme](https://drive.google.com/uc?id=1aJtQG4qmlgj17OQDk1TkZTNrUEE7onDf)
 
 6. **Documentation Folder**
     [View Folder](https://drive.google.com/drive/folders/1dX_RyZfF0mF4qX2hsZ2DJNcvfEDQ45rr?usp=drive_link)
