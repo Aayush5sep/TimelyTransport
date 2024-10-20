@@ -19,16 +19,21 @@ This project is built using **FastAPI** for the backend (microservice architectu
 2. **Entity-Relationship Diagram (ERD):**  
    ![ERD Image](https://drive.google.com/uc?id=1Vxbk7QQJraOQ4DjzTrlbtlHEa_l13H20)
 
-3. **Explanation Document:**  
-   [View Explanation Document](https://drive.google.com/file/d/1dmTW8Bi0f2UegjHM_-ZgRUbZ93j1KhJm/view?usp=drive_link)
-
-4. **Frontend Flow:**
+3. **Frontend Flow:**
    ![View FE Flow Image](https://drive.google.com/uc?id=1KeBdVbr5vQH0pd0z_glBiKmCr2XDMV0k)
 
-5. **Documentation Folder**
+4. **Explanation Document:**  
+   [View Explanation Document](https://drive.google.com/file/d/1dmTW8Bi0f2UegjHM_-ZgRUbZ93j1KhJm/view?usp=drive_link)
+   ![View Document Theme](https://drive.google.com/uc?id=1l2Eek3DwROi4kD6NGdl5ObFxQ69eIYW-)
+
+5. **API Documentation:**  
+   [View API Documentation](https://drive.google.com/file/d/1dmTW8Bi0f2UegjHM_-ZgRUbZ93j1KhJm/view?usp=drive_link)
+   ![View API Doc Theme](https://drive.google.com/file/d/1Gzm_1u5gsg8vYymkXj2GmkjXQOqeTTZ-/view?usp=drive_link)
+
+6. **Documentation Folder**
     [View Folder](https://drive.google.com/drive/folders/1dX_RyZfF0mF4qX2hsZ2DJNcvfEDQ45rr?usp=drive_link)
 
-6. **Video + App:**  
+7. **Video + App:**  
    - **Note:** Due to **Amazon billing issues**, the video demonstration will be delayed until this weekend, as some backend services could not be executed and deployment on **Amazon ECS** wasn’t possible either due to the same.  
    - **Try Locally:** If you wish to explore the system, follow the **Local Deployment steps** below to deploy the app on your local machine.
 
