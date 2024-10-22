@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     SQS_NOTIFICATION_QUEUE_URL: str
     LOCATION_SERVICE_URL: str
     TRIP_MANAGEMENT_SERVICE_URL: str
+    AWS_ACCESS_KEY: str
+    AWS_SECRET_ACCESS_KEY: str
     
     class Config:
         env_file = ".env"

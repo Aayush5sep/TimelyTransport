@@ -10,6 +10,25 @@ if (!getToken()) {
     window.location.href = 'index.html';
 }
 
+// Parse JWT token to extract user information
+function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join('')
+        );
+  
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error('Invalid token:', error);
+        return {};
+    }
+}
+const token_payload = parseJwt(getToken());
+
 const olaMaps = new OlaMapsSDK.OlaMaps({
     apiKey: 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa' // Replace with your API key
 });
@@ -52,7 +71,7 @@ function startGeolocationUpdates() {
 async function fetchActiveTrip() {
     const token = getToken();
     try {
-        const response = await fetch(`${backendUrl}/active`, {
+        const response = await fetch(`${backendUrl}/bookings/active`, {
             headers: { 'token': `${token}` },
         });
 
@@ -64,7 +83,8 @@ async function fetchActiveTrip() {
         }
     } catch (error) {
         console.error('Error fetching active trip:', error);
-        removeToken();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        window.location.href = 'dashboard.html';
     }
 }
 
@@ -91,7 +111,7 @@ function renderTrip(data) {
     `;
 
     // Check user type
-    const userType = localStorage.getItem('userType'); // Assume user type is stored in local storage
+    const userType = token_payload.user; // Assume user type is stored in local storage
     if (userType === 'driver') {
         renderDriverMap(active_trip);
     } else if (userType === 'customer') {
