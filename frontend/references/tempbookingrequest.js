@@ -3,7 +3,7 @@ function checkAuthentication() {
 
     if (!token) {
         alert('You must be logged in to continue.');
-        window.location.href = 'login.html'; // Redirect to login page
+        window.location.href = 'index.html'; // Redirect to login page
         return false;
     }
 

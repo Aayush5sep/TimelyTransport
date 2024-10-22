@@ -11,7 +11,7 @@ Base = declarative_base()
 
 def get_db():
     engine = create_engine(
-        SQLALCHEMY_DATABASE_URL + "transport_management_service",
+        SQLALCHEMY_DATABASE_URL + "trip_management_service",
         poolclass=pool.QueuePool,
         pool_size=10000,
         max_overflow=8000,

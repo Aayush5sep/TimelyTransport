@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 
-from app.utils.enums import VehicleCapacity, VehicleType
+from app.utils.enums import VehicleType
 
 
 class RegisterVehicleRequest(BaseModel):
     registration_number: str
     vehicle_type : VehicleType
-    capacity: VehicleCapacity
+    capacity: str
 
 
 class GetVehicleResponse(BaseModel):
@@ -14,9 +14,8 @@ class GetVehicleResponse(BaseModel):
     driver_id: str
     registration_number: str
     vehicle_type : VehicleType
-    capacity: VehicleCapacity
+    capacity: str
 
 
 class RegisterVehicleResponse(BaseModel):
     message: str
-    vehicle_details: GetVehicleResponse

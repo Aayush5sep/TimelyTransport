@@ -16,24 +16,12 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 app = FastAPI()
 
-class RegexCORSMiddleware(CORSMiddleware):
-    def is_allowed_origin(self, origin: str) -> bool:
-        for pattern in self.allow_origins:
-            if re.fullmatch(pattern, origin):
-                return True
-        return False
-
-allowed_origins = [
-    "*",
-    "http://localhost:8000",
-]
-
 app.add_middleware(
-    RegexCORSMiddleware,
-    allow_origins=allowed_origins,
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 

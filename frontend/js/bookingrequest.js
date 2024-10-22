@@ -3,7 +3,7 @@ function checkAuthentication() {
 
     if (!token) {
         alert('You must be logged in to continue.');
-        window.location.href = 'login.html'; // Redirect to login page
+        window.location.href = 'index.html'; // Redirect to login page
         return false;
     }
 
@@ -38,7 +38,7 @@ function parseJwt(token) {
 checkAuthentication();
 
 const olaMaps = new OlaMapsSDK.OlaMaps({
-    apiKey: 'YOUR_API_KEY'
+    apiKey: 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa'
 });
 
 let myMap, sourceMarker, destinationMarker;
@@ -77,7 +77,7 @@ function addDraggableMarker(coords, color, onDragEnd) {
 
 // Fetch reverse geocoded address
 async function reverseGeocode(lat, lng) {
-    const apiKey = 'YOUR_API_KEY';
+    const apiKey = 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa';
     const url = `https://api.olamaps.io/places/v1/reverse-geocode?latlng=${lat},${lng}&api_key=${apiKey}`;
 
     try {

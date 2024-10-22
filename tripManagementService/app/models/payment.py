@@ -14,8 +14,8 @@ class Payment(Base):
     trip_id = Column(String(36), ForeignKey("booking.id"), nullable=False)
     third_party_reference = Column(String(36), nullable=True)
     amount = Column(Float, nullable=False)
-    mode = Column(Enum(), nullable=False)
-    status = Column(Enum(), nullable=False)
+    mode = Column(String(36), nullable=False)
+    status = Column(String(36), nullable=False)
     created_at = Column(DateTime, nullable=False, default=get_current_time)
 
     def __init__(self, *args, **kwargs):

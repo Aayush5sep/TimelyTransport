@@ -1,13 +1,17 @@
+console.log('Worker script loaded');
 let sse = null;
 let ws = null;
-let locationInterval = null;
+
+let token = null;  // Store the token received from the main thread
 
 // Connect to the Notification Service (SSE)
 function connectToSSE() {
-  const token = localStorage.getItem('authToken'); 
+  console.log('Connecting to SSE');
+  console.log('Token:', token);
   if (!token) return; 
 
-  sse = new EventSource(`http://localhost:8000/notifications?token=${token}`);
+  sse = new EventSource(`http://localhost:8005/notification-stream?token=${token}`);
+  console.log('SSE:', sse);
 
   sse.onmessage = (event) => {
     console.log('Notification:', event.data); 
@@ -21,59 +25,46 @@ function connectToSSE() {
 
 // Connect to WebSocket for sending location updates
 function connectToWebSocket() {
-  const token = localStorage.getItem('authToken');
   if (!token) return;
 
-  ws = new WebSocket(`ws://localhost:8000/location?token=${token}`);
+  ws = new WebSocket(`ws://localhost:8004/ws/location?token=${token}`);
 
   ws.onopen = () => {
     console.log('WebSocket connected');
-    startLocationUpdates(); // Start sending location every 5 seconds
   };
 
   ws.onerror = (err) => console.error('WebSocket Error:', err);
 
   ws.onclose = () => {
     console.log('WebSocket closed');
-    stopLocationUpdates();
   };
 }
 
-// Start sending the current location every 5 seconds
-function startLocationUpdates() {
-  if (locationInterval) return;
-
-  locationInterval = setInterval(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ lat: latitude, lng: longitude }));
-          console.log('Location sent:', latitude, longitude);
-        }
-      },
-      (error) => console.error('Geolocation error:', error),
-      { enableHighAccuracy: true }
-    );
-  }, 5000);
-}
-
-// Stop location updates by clearing the interval
-function stopLocationUpdates() {
-  if (locationInterval) {
-    clearInterval(locationInterval);
-    locationInterval = null;
-  }
-}
-
-// Initialize the SSE connection
-connectToSSE();
 
 // Listen for messages from the main script
-self.onmessage = (event) => {
-  if (event.data.action === 'startWebSocket') {
-    connectToWebSocket();
-  } else if (event.data.action === 'stopWebSocket') {
-    if (ws) ws.close();
-  }
+self.onconnect = (event) => {
+  const port = event.ports[0];
+
+  port.onmessage = (event) => {
+      console.log('Worker message:', event.data);
+      if (event.data.action === 'startWebSocket') {
+          console.log('Starting WebSocket');
+          connectToWebSocket();
+      } else if (event.data.action === 'stopWebSocket') {
+          if (ws) ws.close();
+      } else if (event.data.action === 'setToken') {
+          token = event.data.token;  // Store the token
+          console.log('Token received in worker:', token);
+          // Initialize the SSE connection
+          connectToSSE();
+      } else if (event.data.action === 'updateLocation') {
+          const { driver_id, latitude, longitude } = event.data;
+          console.log('Location received in worker:', driver_id, latitude, longitude);
+          // Here you can send the location to your WebSocket or handle it as needed
+          if (ws && ws.readyState === WebSocket.OPEN) {
+              console.log('Sending location to WebSocket');
+              ws.send(JSON.stringify({ driver_id, latitude, longitude }));
+          }
+      }
+  };
 };

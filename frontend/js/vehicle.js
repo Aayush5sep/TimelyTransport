@@ -28,7 +28,7 @@ function parseJwt(token) {
 }
 const token_payload = parseJwt(getToken());
 
-if (userDetails.user !== 'driver') {
+if (token_payload.user !== 'driver') {
   alert('Only drivers can access this page.');
   window.location.href = 'dashboard.html'; // Redirect to dashboard
 }
@@ -56,27 +56,31 @@ document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
       },
       body: JSON.stringify(vehicleData)
     });
-
+  
+    console.log('Registration response:', response);
+  
     if (response.ok) {
-      // If registration is successful, attempt to refresh the token
       const refreshResponse = await fetch(`${backendUrl}/auth/refresh-token`, {
         method: 'POST',
         headers: { 'token': `${token}` }
       });
-
+  
+      console.log('Refresh response:', refreshResponse);
+  
       const refreshData = await refreshResponse.json();
       if (refreshResponse.ok) {
-        // Store the new token and redirect to the dashboard
-        localStorage.setItem('authToken', refreshData.newToken);
+        localStorage.setItem('authToken', refreshData.access_token);
         window.location.href = 'dashboard.html';
       } else {
         alert('Failed to refresh token');
       }
     } else {
-      alert('Vehicle registration failed');
+      const errorData = await response.json();
+      console.error('Registration error:', errorData);
+      alert('Vehicle registration failed: ' + errorData.message);
     }
   } catch (error) {
     console.error('Error:', error);
     alert('An error occurred during registration.');
-  }
+  }  
 });

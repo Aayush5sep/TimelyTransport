@@ -15,7 +15,7 @@ class Booking(Base):
     id = Column(String(36), primary_key=True, default=str(uuid.uuid4()), unique=True, nullable=False)
     customer_id = Column(String(36), nullable=False)
     driver_id = Column(String(36), nullable=False)
-    payment_id = Column(String(36), ForeignKey("payment.id"), nullable=True)
+    payment_id = Column(String(36), nullable=True)
     source_location = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)
     source_address = Column(String(255), nullable=False)
     destination_location = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)

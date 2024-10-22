@@ -17,16 +17,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 sqs_manager = SQSManager()
 sse_manager = SSEManager()
 
-class RegexCORSMiddleware(CORSMiddleware):
-    def is_allowed_origin(self, origin: str) -> bool:
-        for pattern in self.allow_origins:
-            if re.fullmatch(pattern, origin):
-                return True
-        return False
-
-allowed_origins = [
-    "*",
-]
 
 
 @asynccontextmanager
@@ -50,10 +40,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
 
 @app.get("/notification-stream")
-async def stream(request: Request, user_details: dict = Depends(validate_token)):
+async def stream(request: Request, token: str):
     """Endpoint to establish an SSE connection for a specific user."""
+    user_details = validate_token(token)
     user_id = user_details.get("user_id")
     user_type = user_details.get("user")
     queue = await sse_manager.connect(user_id, user_type)

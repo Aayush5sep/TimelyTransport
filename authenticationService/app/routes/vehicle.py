@@ -50,8 +50,7 @@ async def register_vehicle(
             # TODO: Update token using auth.py endpoint from FE
 
             return {
-                "message": "Vehicle registered sucessfully.",
-                "vehicle_details": new_vehicle
+                "message": "Vehicle registered sucessfully."
             }
 
     except Exception as err:

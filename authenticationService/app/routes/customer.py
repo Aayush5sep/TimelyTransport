@@ -61,9 +61,9 @@ async def register_customer(
 
             # Step 3: Generate JWT access token for authentication
             access_token_data = {
-                "user_id": new_customer.get("id"),
-                "name": new_customer.get("name"),
-                "phone_number": new_customer.get("phone_number"),
+                "user_id": new_customer.id,
+                "name": new_customer.name,
+                "phone_number": new_customer.phone_number,
                 "user": "customer",
                 "exp": datetime.now(timezone.utc) + timedelta(days=7),
             }

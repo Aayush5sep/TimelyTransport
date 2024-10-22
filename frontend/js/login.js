@@ -37,7 +37,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const data = await response.json();
 
     if (response.ok) {
-      saveToken(data.token);
+      saveToken(data.access_token);
       window.location.href = 'dashboard.html'; // Redirect on success
     } else {
       alert(data.message || 'Login failed');

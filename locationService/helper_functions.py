@@ -3,7 +3,7 @@ import requests
 from config import settings
 
 
-def get_driver_vehicle_type_rating(driver_id: str) -> dict:
+async def get_driver_vehicle_type_rating(driver_id: str):
     """
     Fetch driver details from the driver service.
     """

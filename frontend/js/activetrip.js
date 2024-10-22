@@ -7,7 +7,7 @@ function getToken() {
 
 // Redirect to login if token is not present
 if (!getToken()) {
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
 }
 
 const olaMaps = new OlaMapsSDK.OlaMaps({
@@ -19,9 +19,11 @@ let map;
 let driverMarker;
 let driverLocation = { latitude: 12.9716, longitude: 77.5946 }; // Initial placeholder for driver's location
 
-// Initialize the shared worker for notifications
-const worker = new SharedWorker('js/worker.js');
-worker.port.start();  // Ensure the worker's port is active
+// Import the shared worker
+import { getSharedWorker } from 'js/workerSingleton.js';
+const worker = getSharedWorker();
+worker.port.start();  // Ensure port is active
+worker.port.postMessage({ action: 'setToken', token: getToken() });
 
 // Listen for notifications from the worker
 worker.port.onmessage = (event) => {
@@ -29,6 +31,22 @@ worker.port.onmessage = (event) => {
         displayNotificationPopup(event.data.data);
     }
 };
+
+// Handle geolocation and send updates to the worker
+function startGeolocationUpdates() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            // Send location data to the worker
+            worker.port.postMessage({ action: 'updateLocation', driver_id: token_payload.user_id, latitude: latitude, longitude: longitude });
+            console.log('Location sent to worker:', latitude, longitude);
+        }, (error) => {
+            console.error('Geolocation error:', error);
+        });
+    } else {
+        console.error('Geolocation is not supported by this browser.');
+    }
+}
 
 // Fetch active trip from the backend
 async function fetchActiveTrip() {
@@ -242,3 +260,14 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 
 // Call the fetch function on page load
 fetchActiveTrip();
+
+let locationUpdateInterval;
+isActive = localStorage.getItem('rideActive');
+if (isActive) {
+  console.log('Starting WebSocket');
+  worker.port.postMessage({ action: 'startWebSocket' });
+  locationUpdateInterval = setInterval(startGeolocationUpdates, 5000);
+} else {
+  worker.port.postMessage({ action: 'stopWebSocket' });
+  clearInterval(locationUpdateInterval);
+}

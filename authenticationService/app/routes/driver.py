@@ -56,10 +56,10 @@ async def register_driver(
 
             # Step 3: Generate JWT access token for authentication
             access_token_data = {
-                "user_id": new_driver.get("id"),
-                "name": new_driver.get("name"),
-                "phone_number": new_driver.get("phone_number"),
-                "vehicle_id": new_driver.get("vehicle_id"),
+                "user_id": new_driver.id,
+                "name": new_driver.name,
+                "phone_number": new_driver.phone_number,
+                "vehicle_id": new_driver.vehicle_id,
                 "user": "driver",
                 "exp": datetime.now(timezone.utc) + timedelta(days=7),
             }

@@ -90,11 +90,16 @@ async def websocket_endpoint(websocket: WebSocket, redis_client: redis.Redis = D
     """
     if user_details.get("user") != "driver":
         raise HTTPException(status_code=403, detail="Unauthorized driver.")
+    print("Waiting websocket acception")
     await websocket.accept()
+    print("Websocket accepted")
     try:
         while True:
+            print("Waiting to receive location update...")
             data = await websocket.receive_json()
+            print(f"Received location update")
             location_update = LocationUpdate(**data)
+            print(f"{location_update.driver_id} -> {location_update.latitude}, {location_update.longitude}")
             await update_driver_location(
                 location_update.driver_id,
                 location_update.latitude,
@@ -102,8 +107,11 @@ async def websocket_endpoint(websocket: WebSocket, redis_client: redis.Redis = D
                 redis_client,
             )
     except WebSocketDisconnect:
-        print(f"WebSocket disconnected for driver: {data.get('driver_id')}")
+        print(f"WebSocket disconnected for driver: {user_details.get('user_id')}")
         # await redis_client.hset(f"driver:{data.get('driver_id')}", "status", "unavailable") # Maybe activate it if very much sure of shared worker
+    except Exception as e:
+        websocket.close()
+        raise e
 
 
 @router.post("/update-location-manual")

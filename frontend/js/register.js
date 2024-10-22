@@ -192,7 +192,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 
         const data = await response.json();
         if (response.ok) {
-            saveToken(data.token);
+            saveToken(data.access_token);
             window.location.href = userType === 'driver' ? 'vehicle.html' : 'dashboard.html';
         } else {
             alert(data.message || 'Registration failed');

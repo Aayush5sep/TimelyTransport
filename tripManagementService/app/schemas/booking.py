@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from app.utils.enums import RideStatus
 
@@ -35,3 +35,7 @@ class BookingResponse(BaseModel):
 class ActiveTripResponse(BaseModel):
     active_trip: BookingResponse
     tracking_token: Optional[str] = None
+
+
+class CompletedTripResponse(BaseModel):
+    completed_trips: Optional[List[BookingResponse]] = []

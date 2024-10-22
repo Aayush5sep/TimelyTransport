@@ -9,7 +9,7 @@ const notificationsContainer = document.getElementById("notifications");
 
 // Redirect to login if token is missing
 if (!token) {
-    window.location.href = "login.html";
+    window.location.href = "index.html";
 } else {
     initWorker();
     dashboardContainer.style.display = "block";
@@ -101,5 +101,5 @@ logoutButton.onclick = () => {
     localStorage.removeItem("driver_token");
     localStorage.removeItem("is_activated");
     worker.postMessage({ action: "stop" });
-    window.location.href = "login.html";
+    window.location.href = "index.html";
 };

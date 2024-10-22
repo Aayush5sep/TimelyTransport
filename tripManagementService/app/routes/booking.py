@@ -2,7 +2,7 @@ import jwt
 import requests
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import timedelta, timezone, datetime
-from app.schemas.booking import BookingCreate, BookingResponse, ActiveTripResponse
+from app.schemas.booking import BookingCreate, ActiveTripResponse, CompletedTripResponse
 from app.models.booking import Booking
 from app.database import DBFactory
 from app.utils.dependencies import validate_token, generate_tracking_token
@@ -78,15 +78,19 @@ async def get_active_trip(user_details: dict = Depends(validate_token)):
         raise err
 
 
-@router.get("/completed", response_model=list[BookingResponse])
+@router.get("/completed", response_model=CompletedTripResponse)
 async def get_completed_trips(user_details: dict = Depends(validate_token)):
     try:
         with DBFactory() as db:
             if user_details.get("user") == "customer":
                 completed_trips = Booking.get_customer_completed_trips(db, user_details.get("user_id"))
+                if completed_trips is None:
+                    return []
                 return completed_trips
             elif user_details.get("user") == "driver":
                 completed_trips = Booking.get_driver_completed_trips(db, user_details.get("user_id"))
+                if completed_trips is None:
+                    return []
                 return completed_trips
             
             raise HTTPException(status_code=403, detail="Forbidden")
