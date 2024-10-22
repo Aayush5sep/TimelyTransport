@@ -2,10 +2,13 @@ import boto3
 import asyncio
 import json
 
+from config import settings
+
 class SQSManager:
-    def __init__(self, queue_url: str):
-        self.sqs = boto3.client('sqs', region_name='ap-south-1')
-        self.queue_url = queue_url
+    def __init__(self):
+        self.sqs = boto3.client('sqs', region_name='ap-south-1', aws_access_key_id=settings.AWS_ACCESS_KEY, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+        queue_url_response = self.sqs.get_queue_url(QueueName = settings.SQS_QUEUE_NAME)
+        self.queue_url = queue_url_response["QueueUrl"]
 
     async def receive_messages(self, broadcast_function):
         """Function to poll messages from SQS and broadcast them."""

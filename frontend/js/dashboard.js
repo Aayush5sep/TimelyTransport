@@ -5,14 +5,34 @@ function getToken() {
   return localStorage.getItem('authToken');
 }
 
-// Helper to remove token and redirect to login page
-function removeToken() {
-  localStorage.removeItem('authToken');
+// Redirect to login if token is not present
+if (!getToken()) {
   window.location.href = 'login.html';
 }
 
-// Redirect to login if token is not present
-if (!getToken()) {
+// Parse JWT token to extract user information
+let token_payload = {};
+function parseJwt() {
+  try {
+      const token = getToken();
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+          atob(base64).split('').map(function (c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join('')
+      );
+
+      token_payload = JSON.parse(jsonPayload);
+  } catch (error) {
+      console.error('Invalid token:', error);
+      return {};
+  }
+}
+
+// Helper to remove token and redirect to login page
+function removeToken() {
+  localStorage.removeItem('authToken');
   window.location.href = 'login.html';
 }
 
@@ -77,20 +97,20 @@ async function initializeDashboard() {
 
   document.getElementById('profileBox').innerHTML = `
     <h3>Welcome, ${profile.name}</h3>
-    <p>Phone: ${profile.phone}</p>
+    <p>Phone: ${profile.phone_number}</p>
     <p>Email: ${profile.email}</p>
-    <p>User Type: ${profile.user_type}</p>
+    <p>User Type: ${profile.user}</p>
   `;
 
   const userActionButtons = document.getElementById('userActionButtons');
-  if (profile.user_type === 'customer') {
+  if (profile.user === 'customer') {
     userActionButtons.innerHTML = `
       <button id="newBookingButton">Request New Booking</button>
     `;
     document.getElementById('newBookingButton').addEventListener('click', () => {
       window.location.href = 'bookingrequest.html';
     });
-  } else if (profile.user_type === 'driver') {
+  } else if (profile.user === 'driver') {
     const isActive = localStorage.getItem('rideActive') === 'true';
 
     userActionButtons.innerHTML = `
@@ -121,11 +141,11 @@ async function initializeDashboard() {
 initializeDashboard();
 
 document.getElementById('activeTripButton').addEventListener('click', () => {
-  window.location.href = 'active-trip.html'; // Redirect to Active Trip page
+  window.location.href = 'activetrip.html'; // Redirect to Active Trip page
 });
 
 document.getElementById('tripHistoryButton').addEventListener('click', () => {
-  window.location.href = 'trip-history.html'; // Redirect to Trip History page
+  window.location.href = 'tripshistory.html'; // Redirect to Trip History page
 });
 
 // Logout functionality

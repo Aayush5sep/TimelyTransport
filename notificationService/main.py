@@ -14,7 +14,7 @@ from dependencies import validate_token
 # Ignore Deprecation Warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-sqs_manager = SQSManager(settings.SQS_QUEUE_URL)
+sqs_manager = SQSManager()
 sse_manager = SSEManager()
 
 class RegexCORSMiddleware(CORSMiddleware):

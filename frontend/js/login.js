@@ -1,4 +1,4 @@
-const backendUrl = 'localhost:8000'; // Replace with your base auth service url
+const backendUrl = 'http://localhost:8000'; // Auth service url
 
 function getToken() {
   return localStorage.getItem('authToken');

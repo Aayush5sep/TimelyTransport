@@ -9,6 +9,30 @@ if (!getToken()) {
   window.location.href = 'index.html';
 }
 
+// Parse JWT token to extract user information
+function parseJwt(token) {
+  try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+          atob(base64).split('').map(function (c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join('')
+      );
+
+      return JSON.parse(jsonPayload);
+  } catch (error) {
+      console.error('Invalid token:', error);
+      return {};
+  }
+}
+const token_payload = parseJwt(getToken());
+
+if (userDetails.user !== 'driver') {
+  alert('Only drivers can access this page.');
+  window.location.href = 'dashboard.html'; // Redirect to dashboard
+}
+
 document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const token = getToken();

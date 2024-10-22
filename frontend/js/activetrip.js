@@ -1,5 +1,15 @@
 const backendUrl = 'http://localhost:8002'; // Replace with your backend URL
 
+// Get token from localStorage
+function getToken() {
+    return localStorage.getItem('authToken');
+}
+
+// Redirect to login if token is not present
+if (!getToken()) {
+    window.location.href = 'login.html';
+}
+
 const olaMaps = new OlaMapsSDK.OlaMaps({
     apiKey: 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa' // Replace with your API key
 });
@@ -19,16 +29,6 @@ worker.port.onmessage = (event) => {
         displayNotificationPopup(event.data.data);
     }
 };
-
-// Get token from localStorage
-function getToken() {
-    return localStorage.getItem('authToken');
-}
-
-// Redirect to login if token is not present
-if (!getToken()) {
-    window.location.href = 'login.html';
-}
 
 // Fetch active trip from the backend
 async function fetchActiveTrip() {

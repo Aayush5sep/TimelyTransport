@@ -12,7 +12,7 @@ class Driver(Base):
     __tablename__ = "driver"
 
     id = Column(String(36), primary_key=True, default=str(uuid.uuid4()), unique=True, nullable=False, index=True)
-    vehicle_id = Column(String(36), ForeignKey("vehicle.id"), nullable=True)
+    vehicle_id = Column(String(36), nullable=True)
     name = Column(String(255), nullable=False)
     phone_number = Column(String(15), nullable=False)
     email = Column(String(255), nullable=True)

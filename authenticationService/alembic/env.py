@@ -24,6 +24,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 from app.models.customer import Customer
+from app.models.driver import Driver
+from app.models.vehicle import Vehicle
 
 
 # target_metadata = mymodel.Base.metadata

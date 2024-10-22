@@ -16,6 +16,25 @@ if (!getToken()) {
   window.location.href = 'login.html';
 }
 
+// Parse JWT token to extract user information
+function parseJwt(token) {
+  try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+          atob(base64).split('').map(function (c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join('')
+      );
+
+      return JSON.parse(jsonPayload);
+  } catch (error) {
+      console.error('Invalid token:', error);
+      return {};
+  }
+}
+const token_payload = parseJwt(getToken());
+
 // Initialize the shared worker
 const worker = new SharedWorker('js/worker.js');
 worker.port.start();  // Ensure port is active

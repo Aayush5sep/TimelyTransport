@@ -6,8 +6,9 @@ from sqlalchemy import text
 from app.config import settings
 
 
-sqs = boto3.client("sqs", region_name="ap-south-1")
-notification_queue_url = settings.SQS_NOTIFICATION_QUEUE_URL
+sqs = boto3.client('sqs', region_name='ap-south-1', aws_access_key_id=settings.AWS_ACCESS_KEY, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+queue_url_response = sqs.get_queue_url(QueueName = settings.SQS_NOTIFICATION_QUEUE_URL)
+notification_queue_url = queue_url_response["QueueUrl"]
 
 def get_current_time():
     return datetime.datetime.now(pytz.timezone("Asia/Kolkata"))

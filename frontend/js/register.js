@@ -1,7 +1,7 @@
-const backendUrl = 'localhost:8000'; // Replace with your backend URL
+const backendUrl = 'http://localhost:8000'; // Auth Service URL
 
 const olaMaps = new OlaMapsSDK.OlaMaps({
-    apiKey: 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa' // Replace with your API key
+    apiKey: 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa' 
 });
 
 let homeLocation = { latitude: 0, longitude: 0 };
@@ -75,14 +75,14 @@ async function initializeMap() {
 function getCurrentLocation() {
     return new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true, // Try to get a more accurate position
+            enableHighAccuracy: true,
         });
     });
 }
 
 // Perform autocomplete search with debounce
 const performAutocompleteSearch = debounce(async (query) => {
-    const apiKey = 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa'; // Replace with your API key
+    const apiKey = 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa';
     try {
         const response = await fetch(
             `https://api.olamaps.io/places/v1/autocomplete?input=${encodeURIComponent(query)}&api_key=${apiKey}`
@@ -95,7 +95,7 @@ const performAutocompleteSearch = debounce(async (query) => {
     } catch (error) {
         console.error('Error fetching autocomplete results:', error);
     }
-}, 300);
+}, 500);
 
 // Show autocomplete suggestions
 function showAddressSuggestions(predictions) {
@@ -182,7 +182,12 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         const response = await fetch(registerUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone, password, email, name, gender, ...additionalFields }),
+            body: JSON.stringify({ phone_number: phone, 
+                password: password, 
+                email: email, 
+                name: name, 
+                gender: gender, 
+                ...additionalFields }),
         });
 
         const data = await response.json();
