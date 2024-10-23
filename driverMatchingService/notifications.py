@@ -10,20 +10,23 @@ SQS_QUEUE_URL = queue_url_response["QueueUrl"]
 
 async def notify_driver(driver_id, customer_details):
     """Send notification to SQS."""
-    message = {
-        "user_id": driver_id,
-        "user_type": "driver",
-        "status": "trip_request",
-        "message_body": "New trip request from Customer.",
-        "params": customer_details
-    }
+    try:
+        message = {
+            "user_id": driver_id,
+            "user_type": "driver",
+            "status": "trip_request",
+            "message_body": "New trip request from Customer.",
+            "params": customer_details
+        }
 
-    response = sqs_client.send_message(
-        QueueUrl=SQS_QUEUE_URL,
-        MessageBody=json.dumps(message),
-    )
+        response = sqs_client.send_message(
+            QueueUrl=SQS_QUEUE_URL,
+            MessageBody=json.dumps(message),
+        )
 
-    if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-        print(f"Notified Driver {driver_id} for Trip.")
-    else:
-        print(f"Failed to notify Driver {driver_id}.")
+        if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            print(f"Notified Driver {driver_id} for Trip.")
+        else:
+            print(f"Failed to notify Driver {driver_id}.")
+    except Exception as e:
+        raise e

@@ -7,7 +7,7 @@ function getToken() {
 
 // Helper to remove token and redirect to login page
 function removeToken() {
-  localStorage.removeItem('authToken');
+  localStorage.clear();
   window.location.href = 'index.html';
 }
 
@@ -36,7 +36,7 @@ function parseJwt(token) {
 const token_payload = parseJwt(getToken());
 
 // Import the shared worker
-import { getSharedWorker } from 'js/workerSingleton.js';
+import { getSharedWorker } from './workerSingleton.js';
 const worker = getSharedWorker();
 worker.port.start();  // Ensure port is active
 worker.port.postMessage({ action: 'setToken', token: getToken() });
@@ -66,23 +66,94 @@ function startGeolocationUpdates() {
 
 // Display a popup with the notification and buttons
 function displayNotificationPopup(message) {
+  const displayMessage = message;
+  if(message.status === 'trip_request') {
+    const parsedMessage = JSON.parse(message);
+    const tripDetails = parsedMessage.params;
+    displayMessage = `
+      <p><strong>New Trip Request</strong></p>
+      <p><strong>From:</strong> ${tripDetails.source_address}</p>
+      <p><strong>To:</strong> ${tripDetails.destination_address}</p>
+      <p><strong>Vehicle Type:</strong> ${tripDetails.vehicle_type}</p>
+    `;
+  }
   const popup = document.createElement('div');
   popup.className = 'notification-popup';
   popup.innerHTML = `
-    <p>${message}</p>
-    <button id="acceptButton">Ok</button>
-    <button id="rejectButton">Cancel</button>
+    <p>${displayMessage}</p>
+    <button id="acceptButton">Accept</button>
+    <button id="rejectButton">Reject</button>
   `;
 
   document.body.appendChild(popup);
 
   document.getElementById('acceptButton').addEventListener('click', () => {
-    console.log('Ok');
+    const token = getToken();
+    const parsedMessage = JSON.parse(message);
+    const requestBody = {
+      customer_id: parsedMessage.params.user_id,
+      driver_id: token_payload.user_id,
+      status: 'accepted'
+    };
+
+    fetch('http://localhost:8001/driver/response', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      body: JSON.stringify(requestBody)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('Response sent successfully:', data);
+        setTimeout(() => {
+          window.location.href = 'activetrip.html';
+        }, 2000);
+      } else {
+        console.error('Failed to send response:', data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error sending response:', error);
+    });
+
     popup.remove();
   });
 
   document.getElementById('rejectButton').addEventListener('click', () => {
-    console.log('Cancel');
+    const token = getToken();
+    const parsedMessage = JSON.parse(message);
+    const requestBody = {
+      customer_id: parsedMessage.params.user_id,
+      driver_id: token_payload.user_id,
+      status: 'denied'
+    };
+
+    fetch('http://localhost:8001/driver/response', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      body: JSON.stringify(requestBody)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('Response sent successfully:', data);
+        setTimeout(() => {
+          window.location.href = 'activetrip.html';
+        }, 2000);
+      } else {
+        console.error('Failed to send response:', data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error sending response:', error);
+    });
+
     popup.remove();
   });
 }
@@ -99,11 +170,11 @@ async function fetchCompletedTrips() {
     if (response.ok) {
       renderTrips(data);
     } else {
-      console.error('Failed to fetch completed trips:', data.message);
+      alert('Failed to fetch completed trips:', data.message);
       window.location.href = 'index.html';
     }
   } catch (error) {
-    console.error('Error fetching completed trips:', error);
+    alert('Error fetching completed trips:', error);
     window.location.href = 'index.html';
   }
 }
@@ -134,7 +205,7 @@ function renderTrips(trips) {
 fetchCompletedTrips();
 
 let locationUpdateInterval;
-isActive = localStorage.getItem('rideActive');
+const isActive = localStorage.getItem('rideActive');
 if (isActive) {
   console.log('Starting WebSocket');
   worker.port.postMessage({ action: 'startWebSocket' });

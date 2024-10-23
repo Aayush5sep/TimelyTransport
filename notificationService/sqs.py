@@ -28,11 +28,11 @@ class SQSManager:
                     user_id = notification.get("user_id")
                     user_type = notification.get("user_type")
                     status = notification.get("status", "success")
-                    message_body = notification.get("message")
+                    message_body = notification.get("message_body")
                     params = notification.get("params", {})
 
                     # Broadcast the message to the specified user
-                    await broadcast_function(message_body, user_id, user_type, status, params)
+                    await broadcast_function(user_id, user_type, message_body, status, params)
 
                     # Delete the message from SQS after processing
                     self.sqs.delete_message(

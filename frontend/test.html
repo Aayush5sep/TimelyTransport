@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map with Draggable Marker</title>
+    <link rel="stylesheet" href="OlaMapsWebSDK/style.css">
+    <style>
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+        #coordinates {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<div id="coordinates">Coordinates: <span id="coords">Loading...</span></div>
+<div id="map"></div>
+
+<script src="OlaMapsWebSDK/olamaps-js-sdk.umd.js"></script>
+<script>
+const olaMaps = new OlaMapsSDK.OlaMaps({
+    apiKey: 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa' 
+});
+
+let homeLocation = { latitude: 0, longitude: 0 };
+let map;
+let marker;
+async function initializeMap() {
+    try {
+        const position = await getCurrentLocation();
+        const { latitude, longitude } = position.coords;
+
+        homeLocation = { latitude, longitude };
+
+        // Initialize the map centered at the current location
+        map = olaMaps.init({
+            style: 'https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json',
+            container: 'map',
+            center: [longitude, latitude],
+            zoom: 15,
+        });
+
+        // Add a draggable marker at the current location
+        marker = olaMaps
+        .addMarker({
+            offset: [0, -10],  // Optional: Adjust marker position if needed
+            anchor: 'bottom',  // Anchor at the bottom for a pin-like marker
+            color: 'red',      // Set marker color
+            draggable: true    // Make the marker draggable
+        })
+        .setLngLat([longitude, latitude])  // Set initial marker position
+        .addTo(map);  // Add the marker to the map
+
+        // Update homeLocation when the marker is dragged
+        marker.on('dragend', () => {
+            const newCoords = marker.getLngLat();
+            homeLocation = { latitude: newCoords.lat, longitude: newCoords.lng };
+            console.log('New location:', homeLocation);
+        });
+    } catch (error) {
+        console.error('Error getting current location:', error);
+        alert('Unable to retrieve your location. Please ensure location services are enabled.');
+    }
+}
+function getCurrentLocation() {
+    return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+        });
+    });
+}
+initializeMap();
+</script>
+
+</body>
+</html>

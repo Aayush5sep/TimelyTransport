@@ -24,9 +24,14 @@ class SSEManager:
         """Send a message along with its status to a specific client."""
         key = f"{user_id}:{user_type}"
         if key in self.clients:
-            # Encode the message and status into a JSON object
-            data = json.dumps({"message": message, "status": status, "params": params})
-            await self.clients[key].put(data)
+            try:
+                # Encode the message and status into a JSON object
+                data = json.dumps({"message": message, "status": status, "params": params})
+                await self.clients[key].put(data)
+            except Exception as e:
+                # Log or handle the error
+                print(f"Failed to send message to {key}: {e}")
+
 
     async def event_generator(self, queue: asyncio.Queue):
         """Generator function to stream events to the client."""
@@ -34,5 +39,7 @@ class SSEManager:
             while True:
                 message = await queue.get()
                 yield f"data: {message}\n\n"
-        except asyncio.CancelledError:
+        except asyncio.CancelledError as err:
             pass  # Handle client disconnection
+        except Exception as e:
+            raise e

@@ -45,7 +45,7 @@ async def get_drivers_within_radius_with_filtering(
     """
     Query Redis to find drivers within a certain radius with filtering.
     """
-    current_time = time.time()
+    # current_time = time.time()
 
     # Fetch nearby drivers using Redis GEO search
     nearby_drivers = await redis_client.geosearch(
@@ -57,28 +57,39 @@ async def get_drivers_within_radius_with_filtering(
         withdist=True,
         withcoord=True
     )
+    # print(nearby_drivers)
 
     results = []
-    for (driver_id, distance, coords) in nearby_drivers:
-        driver_data = await redis_client.hgetall(f"driver:{driver_id.decode('utf-8')}")
+    for (driver_key, distance, coords) in nearby_drivers:
+        driver_id = driver_key.split(":")[1]
+        driver_data = await redis_client.hgetall(f"driver:{driver_id}")
+        # print(driver_data)
+        # print(current_time)
 
         # Validate and filter driver data
+        # Print each condition result beforehand
+        # print(f"Driver data exists: {bool(driver_data)}")
+        # print(f'Driver status is available: {driver_data.get("status") == "available"}')
+        # print(f'Vehicle type matches: {vehicle_type is None or driver_data.get("vehicle_type") == vehicle_type}')
+        # print(f'Timestamp is recent: {current_time - float(driver_data.get("timestamp", 0)) < 120}')
+
         if (
             driver_data and
-            driver_data.get(b"status") == b"available" and  # Driver must be available
-            (vehicle_type is None or driver_data.get(b"vehicle_type") == vehicle_type.encode('utf-8')) and
-            current_time - float(driver_data.get(b"timestamp", 0)) < 30  # Must be recent
+            driver_data.get("status") == "available" and  # Driver must be available
+            (vehicle_type is None or driver_data.get("vehicle_type") == vehicle_type) 
+            # and current_time - float(driver_data.get("timestamp", 0)) < 300  # Must be recent
         ):
             latitude, longitude = coords
             results.append({
-                "driver_id": driver_id.decode('utf-8'),
+                "driver_id": driver_id,
                 "distance": distance,
                 "latitude": latitude,
                 "longitude": longitude,
-                "vehicle_type": driver_data.get(b"vehicle_type", b"").decode('utf-8'),
-                "rating": driver_data.get(b"rating", b"").decode('utf-8'),
-                "status": driver_data.get(b"status", b"").decode('utf-8')
+                "vehicle_type": driver_data.get(b"vehicle_type", b""),
+                "rating": driver_data.get(b"rating", b""),
+                "status": driver_data.get(b"status", b"")
             })
+    # print(results)
 
     return results
 
@@ -90,16 +101,11 @@ async def websocket_endpoint(websocket: WebSocket, redis_client: redis.Redis = D
     """
     if user_details.get("user") != "driver":
         raise HTTPException(status_code=403, detail="Unauthorized driver.")
-    print("Waiting websocket acception")
     await websocket.accept()
-    print("Websocket accepted")
     try:
         while True:
-            print("Waiting to receive location update...")
             data = await websocket.receive_json()
-            print(f"Received location update")
             location_update = LocationUpdate(**data)
-            print(f"{location_update.driver_id} -> {location_update.latitude}, {location_update.longitude}")
             await update_driver_location(
                 location_update.driver_id,
                 location_update.latitude,
@@ -152,12 +158,13 @@ async def update_driver_status(status: str, redis_client: redis.Redis = Depends(
 
 
 @router.post("/proximity")
-async def get_nearby_drivers(query: ProximityQuery, redis_client: redis.Redis = Depends(get_redis), user_details: dict = Depends(validate_auth_token)):
+async def get_nearby_drivers(query: ProximityQuery, redis_client: redis.Redis = Depends(get_redis)):
     """
     API endpoint to get all closest drivers within a certain radius.
     """
-    if user_details.get("user") != "customer":
-        raise HTTPException(status_code=403, detail="Unauthorized customer.")
+    # if user_details.get("user") != "customer":
+    #     raise HTTPException(status_code=403, detail="Unauthorized customer.")
+    # print(query.__dict__)
     drivers = await get_drivers_within_radius_with_filtering(
         query.latitude, query.longitude, query.radius, redis_client, query.vehicle_type
     )
@@ -167,7 +174,7 @@ async def get_nearby_drivers(query: ProximityQuery, redis_client: redis.Redis = 
 @router.websocket("/ws/driver-location")
 async def websocket_driver_location(
     websocket: WebSocket,
-    redis_client: redis.Redis = Depends(lambda: redis.Redis.from_url("redis://localhost")),
+    redis_client: redis.Redis = Depends(get_redis),
 ):
     """WebSocket route to provide driver location tracking."""
     # Accept the WebSocket connection first
@@ -203,7 +210,7 @@ async def websocket_driver_location(
             if not location or location[0] is None:
                 raise HTTPException(status_code=404, detail="Driver location not found.")
 
-            latitude, longitude = location[0]
+            longitude, latitude = location[0]
 
             # Update driver location to send to the client
             driver_info["latitude"] = latitude

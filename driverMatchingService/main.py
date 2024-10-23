@@ -44,7 +44,7 @@ async def notify_via_ws(user_id: str, message: dict):
         await websocket.send_json(message)
 
 
-async def get_nearby_drivers_from_service(latitude, longitude, radius, vehicle_type=None):
+async def get_nearby_drivers_from_service(latitude, longitude, radius, vehicle_type="Car"):
     """Call the Proximity Service to get nearby drivers."""
     params = {
         "latitude": latitude,
@@ -52,11 +52,15 @@ async def get_nearby_drivers_from_service(latitude, longitude, radius, vehicle_t
         "radius": radius,
         "vehicle_type": vehicle_type,
     }
+    headers = {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+    }
 
     async with httpx.AsyncClient() as client:
         for attempt in range(3):
             try:
-                response = await client.post(settings.LOCATION_SERVICE_URL, json=params)
+                response = await client.post(settings.LOCATION_SERVICE_URL + "/proximity", headers=headers, json=params)
                 response.raise_for_status()
                 return response.json().get("drivers", [])
             except httpx.HTTPStatusError as err:
@@ -71,9 +75,8 @@ async def get_nearby_drivers_from_service(latitude, longitude, radius, vehicle_t
 from drivers import match_and_notify
 
 @app.websocket("/ws/request-booking")
-async def websocket_request_booking(websocket: WebSocket):
+async def websocket_request_booking(websocket: WebSocket, user_details: dict = Depends(validate_token_ws)):
     """WebSocket connection for customer booking."""
-    user_details: dict = await validate_token_ws(websocket)
     if user_details.get("user") != "customer":
         raise HTTPException(status_code=403, detail="Only logged in customers are allowed.")
     user_id = user_details.get("user_id")
@@ -111,11 +114,13 @@ async def websocket_request_booking(websocket: WebSocket):
         # Handle customer disconnect
         await cancel_task_if_active(user_id)
         active_connections.pop(user_id, None)
+        await websocket.close()
 
     finally:
         # Clean up connections and tasks
         active_connections.pop(user_id, None)
         await cancel_task_if_active(user_id)
+        await websocket.close()
 
 
 @app.post("/driver/response")
@@ -187,7 +192,7 @@ async def get_eta_fare(booking_details: RequestBooking, user_details: dict = Dep
     duration_seconds = route["duration"]
 
     # Calculate fare
-    fare = BASE_FARE + (FARE_PER_KM * distance_m)
+    fare = BASE_FARE + (FARE_PER_KM * distance_m/1000)
 
     return {
         "distance": round(distance_m, 2),

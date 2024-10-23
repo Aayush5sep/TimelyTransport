@@ -215,17 +215,16 @@ document.getElementById("calculateBtn").addEventListener("click", async () => {
                     latitude: destination.lat,
                     longitude: destination.lng
                 },
-                source_address: document.getElementById('startAddress').value,
-                destination_address: document.getElementById('endAddress').value,
                 vehicle_type: vehicleType
             })
         });
 
         const data = await response.json();
         if (response.ok) {
-            document.getElementById("distance").innerText = `${data.distance} km`;
-            document.getElementById("eta").innerText = `${data.eta} minutes`;
-            document.getElementById("fare").innerText = `${data.fare} currency units`;
+            console.log('Route details:', data);
+            document.getElementById("distance").innerText = `${formatDistance(data.distance)} km`;
+            document.getElementById("eta").innerText = `${formatTime(data.eta)} minutes`;
+            document.getElementById("fare").innerText = `${data.fare} rupees`;
             document.getElementById("result").style.display = "block";
         } else {
             console.error('Error:', data.detail);
@@ -239,14 +238,16 @@ document.getElementById("calculateBtn").addEventListener("click", async () => {
 
 // WebSocket for booking request
 document.getElementById("requestBookingBtn").addEventListener("click", () => {
-    const socket = new WebSocket("ws://localhost:8001/ws/request-booking");
+    const socket = new WebSocket("ws://localhost:8001/ws/request-booking?token=" + localStorage.getItem('authToken'));
     socket.onopen = () => {
         const source = sourceMarker.getLngLat();
         const destination = destinationMarker.getLngLat();
         socket.send(JSON.stringify({
             source_location: { latitude: source.lat, longitude: source.lng },
             destination_location: { latitude: destination.lat, longitude: destination.lng },
-            vehicleType: document.getElementById("vehicleType").value
+            source_address: document.getElementById('startAddress').value,
+            destination_address: document.getElementById('endAddress').value,
+            vehicle_type: document.getElementById("vehicleType").value
         }));
         document.getElementById("bookingStatus").style.display = "block";
     };
@@ -255,11 +256,14 @@ document.getElementById("requestBookingBtn").addEventListener("click", () => {
         const data = JSON.parse(event.data);
         if (data.status === "success") {
             alert("Booking request successful. Driver Found");
-            window.location.href = "activetrip.html";
+            // window.location.href = "activetrip.html";
+        }
+        else if (data.status === "failed") {
+            alert(data.message);
+            // window.location.href = "dashboard.html";
         }
         else {
-            alert(data.message);
-            window.location.href = "dashboard.html";
+            console.log(data);
         }
     };
 });

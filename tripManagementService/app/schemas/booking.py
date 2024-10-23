@@ -38,4 +38,4 @@ class ActiveTripResponse(BaseModel):
 
 
 class CompletedTripResponse(BaseModel):
-    completed_trips: Optional[List[BookingResponse]] = []
+    completed_trips: Optional[List[BookingResponse]] = None

@@ -33,12 +33,12 @@ parseJwt();
 
 // Helper to remove token and redirect to login page
 function removeToken() {
-  localStorage.removeItem('authToken');
+  localStorage.clear();
   window.location.href = 'index.html';
 }
 
 // Import the shared worker
-import { getSharedWorker } from 'js/workerSingleton.js';
+import { getSharedWorker } from './workerSingleton.js';
 const worker = getSharedWorker();
 worker.port.start();  // Ensure port is active
 worker.port.postMessage({ action: 'setToken', token: getToken() });
@@ -46,6 +46,7 @@ worker.port.postMessage({ action: 'setToken', token: getToken() });
 // Listen for notifications from the worker
 worker.port.onmessage = (event) => {
   if (event.data.type === 'notification') {
+    // console.log('Notification:', event.data.data);
     displayNotificationPopup(event.data.data);
   }
 };
@@ -60,18 +61,33 @@ function startGeolocationUpdates() {
           console.log('Location sent to worker:', latitude, longitude);
       }, (error) => {
           console.error('Geolocation error:', error);
-      });
+      },
+    {
+      enableHighAccuracy: true,
+    });
   } else {
       console.error('Geolocation is not supported by this browser.');
   }
 }
 
+// {"message": "New trip request from Customer.", "status": "trip_request", "params": {"user_id": "5d9e1fc7-bcf8-4f62-916d-29435619c536", "source_location": {"latitude": 28.74941, "longitude": 77.11835}, "source_address": "Delhi Technological University, Bawana Rd, Delhi Technological University, Shahbad Daulatpur Village, Rohini, New Delhi, Delhi, 110042, India", "destination_location": {"latitude": 28.14959, "longitude": 77.338434}, "destination_address": "Shiv Colony, Palwal, Haryana, 121102, India", "vehicle_type": "Car"}}
 // Display a popup with the notification and buttons
 function displayNotificationPopup(message) {
+  const displayMessage = message;
+  if(message.status === 'trip_request') {
+    const parsedMessage = JSON.parse(message);
+    const tripDetails = parsedMessage.params;
+    displayMessage = `
+      <p><strong>New Trip Request</strong></p>
+      <p><strong>From:</strong> ${tripDetails.source_address}</p>
+      <p><strong>To:</strong> ${tripDetails.destination_address}</p>
+      <p><strong>Vehicle Type:</strong> ${tripDetails.vehicle_type}</p>
+    `;
+  }
   const popup = document.createElement('div');
   popup.className = 'notification-popup';
   popup.innerHTML = `
-    <p>${message}</p>
+    <p>${displayMessage}</p>
     <button id="acceptButton">Accept</button>
     <button id="rejectButton">Reject</button>
   `;
@@ -79,12 +95,72 @@ function displayNotificationPopup(message) {
   document.body.appendChild(popup);
 
   document.getElementById('acceptButton').addEventListener('click', () => {
-    console.log('Accepted');
+    const token = getToken();
+    const parsedMessage = JSON.parse(message);
+    const requestBody = {
+      customer_id: parsedMessage.params.user_id,
+      driver_id: token_payload.user_id,
+      status: 'accepted'
+    };
+
+    fetch('http://localhost:8001/driver/response', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      body: JSON.stringify(requestBody)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('Response sent successfully:', data);
+        setTimeout(() => {
+          window.location.href = 'activetrip.html';
+        }, 2000);
+      } else {
+        console.error('Failed to send response:', data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error sending response:', error);
+    });
+
     popup.remove();
   });
 
   document.getElementById('rejectButton').addEventListener('click', () => {
-    console.log('Rejected');
+    const token = getToken();
+    const parsedMessage = JSON.parse(message);
+    const requestBody = {
+      customer_id: parsedMessage.params.user_id,
+      driver_id: token_payload.user_id,
+      status: 'denied'
+    };
+
+    fetch('http://localhost:8001/driver/response', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      body: JSON.stringify(requestBody)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('Response sent successfully:', data);
+        setTimeout(() => {
+          window.location.href = 'activetrip.html';
+        }, 2000);
+      } else {
+        console.error('Failed to send response:', data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error sending response:', error);
+    });
+
     popup.remove();
   });
 }
@@ -101,11 +177,9 @@ async function fetchUserProfile() {
       return data;
     } else {
       console.error('Failed to fetch profile:', data.message);
-      removeToken();
     }
   } catch (error) {
     console.error('Error fetching profile:', error);
-    removeToken();
   }
 }
 

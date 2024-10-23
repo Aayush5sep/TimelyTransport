@@ -71,7 +71,7 @@ async def get_active_trip(user_details: dict = Depends(validate_token)):
                 active_trip = Booking.get_driver_active_trip(db, user_details.get("user_id"))
                 if active_trip is None:
                     raise HTTPException(status_code=404, detail="No active trips found")
-                return {"active_trip": active_trip}
+                return {"active_trip": active_trip, "tracking_token": None}
             
             raise HTTPException(status_code=403, detail="Forbidden")
     except Exception as err:
@@ -84,13 +84,13 @@ async def get_completed_trips(user_details: dict = Depends(validate_token)):
         with DBFactory() as db:
             if user_details.get("user") == "customer":
                 completed_trips = Booking.get_customer_completed_trips(db, user_details.get("user_id"))
-                if completed_trips is None:
-                    return []
+                if completed_trips is None or len(completed_trips) == 0:
+                    raise HTTPException(status_code=404, detail="No completed trips found")
                 return completed_trips
             elif user_details.get("user") == "driver":
                 completed_trips = Booking.get_driver_completed_trips(db, user_details.get("user_id"))
-                if completed_trips is None:
-                    return []
+                if completed_trips is None or len(completed_trips) == 0:
+                    raise HTTPException(status_code=404, detail="No completed trips found")
                 return completed_trips
             
             raise HTTPException(status_code=403, detail="Forbidden")

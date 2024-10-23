@@ -33,6 +33,7 @@ async def create_trip(driver_id: str, booking_details: RequestBooking):
 
 async def match_and_notify(nearby_drivers, booking_details: RequestBooking):
     """Match available drivers and notify them one-by-one until one accepts."""
+
     for driver in nearby_drivers:
         driver_id = driver["driver_id"]
 
@@ -44,7 +45,7 @@ async def match_and_notify(nearby_drivers, booking_details: RequestBooking):
             # Notify the driver
             await notify_driver(
                 driver_id=driver_id,
-                customer_details=booking_details,
+                customer_details=booking_details.model_dump(),
             )
 
             # Wait for the driver's response
@@ -54,7 +55,7 @@ async def match_and_notify(nearby_drivers, booking_details: RequestBooking):
             temp_trip_id = f"{booking_details.user_id}+{driver_id}"
             if await check_trip_status(temp_trip_id):
                 # Driver accepted; create the trip via HTTP request to Trip Management Service
-                notify_via_ws(
+                await notify_via_ws(
                     booking_details.user_id,
                     {"status": "success", "message": "Driver accepted the trip request."},
                 )
@@ -68,5 +69,5 @@ async def match_and_notify(nearby_drivers, booking_details: RequestBooking):
     # Notify the customer if no driver accepted the trip
     await notify_via_ws(
         booking_details.user_id, 
-        {"status": "failed", "message": "No driver found for the trip request."}
+        {"status": "failed", "message": "No driver accepted the trip request."}
     )

@@ -33,13 +33,12 @@ const olaMaps = new OlaMapsSDK.OlaMaps({
     apiKey: 'OyIE1iZDygLFJkrzgVxKLeufCGHd3UHLblmHWFSa' // Replace with your API key
 });
 
-let homeLocation = { latitude: 0, longitude: 0 };
 let map;
 let driverMarker;
 let driverLocation = { latitude: 12.9716, longitude: 77.5946 }; // Initial placeholder for driver's location
 
 // Import the shared worker
-import { getSharedWorker } from 'js/workerSingleton.js';
+import { getSharedWorker } from './workerSingleton.js';
 const worker = getSharedWorker();
 worker.port.start();  // Ensure port is active
 worker.port.postMessage({ action: 'setToken', token: getToken() });
@@ -82,7 +81,7 @@ async function fetchActiveTrip() {
             handleError(data);
         }
     } catch (error) {
-        console.error('Error fetching active trip:', error);
+        alert('Error fetching active trip:', error);
         await new Promise(resolve => setTimeout(resolve, 2000));
         window.location.href = 'dashboard.html';
     }
@@ -90,7 +89,7 @@ async function fetchActiveTrip() {
 
 // Handle errors and display appropriate messages
 function handleError(data) {
-    console.error('Error:', data.message);
+    alert('Error:', data.message);
     const tripDetails = document.getElementById('tripDetails');
     tripDetails.innerHTML = `<p class="error">${data.message}</p>`;
 }
@@ -282,7 +281,7 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 fetchActiveTrip();
 
 let locationUpdateInterval;
-isActive = localStorage.getItem('rideActive');
+const isActive = localStorage.getItem('rideActive');
 if (isActive) {
   console.log('Starting WebSocket');
   worker.port.postMessage({ action: 'startWebSocket' });

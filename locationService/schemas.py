@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class LocationUpdate(BaseModel):
@@ -11,4 +12,4 @@ class ProximityQuery(BaseModel):
     latitude: float
     longitude: float
     radius: float
-    vehicle_type: str
+    vehicle_type: Optional[str] = None

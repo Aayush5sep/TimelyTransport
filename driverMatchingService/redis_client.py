@@ -2,8 +2,8 @@ import redis.asyncio as redis
 from config import settings
 
 # Initialize Redis client
-# redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
-redis_client = None
+redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
+# redis_client = None
 
 async def set_driver_state(driver_id: str, state: str, expiry: int = 60):
     """Set the driver state in Redis."""
